@@ -351,7 +351,8 @@
                                                 <p><strong>Флаг удаленности детали:</strong> ${convertBoolean(partResponse.deleted)}</p>
                                                 <p><strong>Флаг разрешенности детали:</strong> ${convertBoolean(partResponse.accepted)}</p>
                                             `;
-
+                        
+                        fetchEtString(partResponse.name, partResponse.producerId)
                         fetchEtPartsField(partResponse.id, partResponse.producerId)
 
                         $("#etPartInfo").html(etPartInfoHtml);
@@ -366,6 +367,7 @@
                 },
                 complete: function() {
                     $("#additionally").empty();
+                    $("#loading").hide();
                 }
             });
         });
@@ -382,7 +384,26 @@
                     alert("Произошла ошибка при получении применимости: " + error);
                 },
                 complete: function() {
-                    $("#loading").hide();
+                   
+                }
+            });
+        }
+
+        function fetchEtString(id_str, producer_id){
+            console.log('http://109.196.101.10:8000/et-string/' + id_str + '/' + producer_id)
+            $.ajax({
+                url: 'http://109.196.101.10:8000/et-string/' + id_str + '/' + producer_id,  
+                type: 'GET',
+                dataType: 'json',
+                success: function(stringResponse) {
+                    console.log(stringResponse)
+                    $("#etPartInfo").append(`<p><strong>Название:</strong> ${stringResponse?.text || "Нет данных"}</p>`);
+                },
+                error: function(xhr, status, error) {
+                    alert("Произошла ошибка при получении применимости: " + error);
+                },
+                complete: function() {
+                    
                 }
             });
         }
