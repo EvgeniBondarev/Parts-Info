@@ -1,6 +1,6 @@
 // Обновленная функция searchArticles
 function searchArticles(searchNumber) {
-    const apiUrl = `https://partsapi.ru/api.php?method=searchArticles&key=13da941431e45112cea3264dda191863&SEARCH_NUMBER=${searchNumber}&LANG=16`;
+    const apiUrl = `https://api.partsapi.ru/?method=searchArticles&key=13da941431e45112cea3264dda191863&SEARCH_NUMBER=${searchNumber}&LANG=16`;
     
     // Показываем анимацию загрузки
     $("#loading").show();
@@ -48,7 +48,7 @@ function searchArticles(searchNumber) {
 
 // Функция для запроса информации о статье
 function getArticle(artNum, supId) {
-    const apiUrl = `http://partsapi.ru/api.php?method=getArticle&key=a7ea438b2fa4a5d8101d1a2c30ae8152&LANG=16&ART_NUM=${artNum}&SUP_ID=${supId}`;
+    const apiUrl = `https://api.partsapi.ru/?method=getArticle&key=a7ea438b2fa4a5d8101d1a2c30ae8152&LANG=16&ART_NUM=${artNum}&SUP_ID=${supId}`;
     console.log(apiUrl)
     // Показываем анимацию загрузки
     $("#loading").show();
@@ -74,7 +74,7 @@ function getArticle(artNum, supId) {
 
 // Функция для запроса медиафайлов статьи
 function getArticleMedia(artId) {
-    const apiUrl = `https://partsapi.ru/api.php?method=getArticleMedia&key=831ecbd71823d2827768fdcaf25e26ee&ART_ID=${artId}&LANG=16`;
+    const apiUrl = `https://api.partsapi.ru/?method=getArticleMedia&key=831ecbd71823d2827768fdcaf25e26ee&ART_ID=${artId}&LANG=16`;
     console.log(apiUrl);
     
     // Показываем анимацию загрузки
@@ -102,7 +102,7 @@ function getArticleMedia(artId) {
 
 // Функция для запроса кроссовых артикулов
 function getCrosses(number, brand) {
-    const apiUrl = `https://partsapi.ru/api.php?method=getCrossesWithBrand&key=b19f785b5e4e2b3c2279b7e9deacfc76&number=${number}&brand=${brand}`;
+    const apiUrl = `https://api.partsapi.ru/?method=getCrossesWithBrand&key=b19f785b5e4e2b3c2279b7e9deacfc76&number=${number}&brand=${brand}`;
     console.log(apiUrl);
     
     // Показываем анимацию загрузки
@@ -128,7 +128,7 @@ function getCrosses(number, brand) {
 
 // Пример вызова функции после успешного запроса
 function getArticleCriteria(artId) {
-    const apiUrl = `https://partsapi.ru/api.php?method=getArticleCriteria&key=cb5871d2d395944e05d679ef5a3f3c29&ART_ID=${artId}&LANG=16`;
+    const apiUrl = `https://api.partsapi.ru/?method=getArticleCriteria&key=cb5871d2d395944e05d679ef5a3f3c29&ART_ID=${artId}&LANG=16`;
     console.log(apiUrl);
 
     // Показываем анимацию загрузки
@@ -161,7 +161,7 @@ function getArticleCriteria(artId) {
 
 
 function getPartWeight(brand, number) {
-    const apiUrl = `https://partsapi.ru/api.php?method=getPartWeight&key=3cb234cabfba9a0775b4e804420916d5&brand=${encodeURIComponent(brand)}&number=${encodeURIComponent(number)}`;
+    const apiUrl = `https://api.partsapi.ru/?method=getPartWeight&key=3cb234cabfba9a0775b4e804420916d5&brand=${encodeURIComponent(brand)}&number=${encodeURIComponent(number)}`;
     console.log(apiUrl);
 
     // Показываем анимацию загрузки

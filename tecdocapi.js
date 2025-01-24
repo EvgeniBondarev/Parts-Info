@@ -106,6 +106,10 @@
                     $("#crossesList").empty();
                     $("#criteriaList").empty();
                     $("#partWeight").empty();
+                    $("#ean").empty();
+                    $("#etPartInfo").empty();
+                    $("#additionally").empty();
+                    $("#partsApi").empty();
 
                     // Показываем изображения
                     if (detailResponse.img_urls && detailResponse.img_urls.length > 0) {
@@ -171,9 +175,16 @@
                             $("#supplierFromTd").attr("data-supplier-id", tdSupplier.id);
                             $("#supplierFromTd").attr("data-brand", tdSupplier.description);
                         }
+                    if (jcSupplier){
+                            $("#supplierFromJc").attr("data-supplier-id", jcSupplier.id);
+                            $("#additionally").html("<a href='#' class='et-part-link'>Дополнительно...</a>")
+                        }
 
-                    // Измените этот участок кода
-                    $("#ean").html("<strong>Ean:</strong>" + ean + "<br/><br/><a href='#' class='ean-link' data-ean='" + ean + "'>Информация из PARTSAPI.RU</a>");
+                    $("#ean").html("<strong>Ean:</strong>" + ean);
+                    if(detailResponse.article_ean?.ean){
+                            $("#partsApi").html("<a href='#' class='ean-link' data-ean='" + ean + "'>Информация из PARTSAPI.RU</a>")
+                        }
+                    
 
                     // Обработчик вывода атрибутов
                     if (detailResponse.article_schema) {
@@ -229,8 +240,8 @@
             });
         }
 
-        // Обработчик клика по ссылке для замещений
-        $(document).on('click', '.substituteLink', function(event) {
+         // Обработчик клика по ссылке для замещений
+         $(document).on('click', '.substituteLink', function(event) {
             event.preventDefault();
             var description = $(this).data('description');
             var article = $(this).data('article');
@@ -308,6 +319,74 @@
             });
         });
 
+
+        $(document).on('click', '.et-part-link', function(event) {
+            event.preventDefault();
+            var supplierId = $("#supplierFromJc")[0].dataset.supplierId; 
+            var article = $("#article").val();
+
+            // Показываем анимацию загрузки
+            $("#loading").show();
+
+            // Запрашиваем замену
+            $.ajax({
+                url: 'http://109.196.101.10:8000/et-part/' + article + '/' + supplierId,  
+                type: 'GET',
+                dataType: 'json',
+                success: function(partResponse) {
+                    // Очищаем старую информацию о замещениях
+                    $("#etPartInfo").empty();
+                    
+                    console.log(partResponse)
+                    // Если есть Substitute, выводим их информацию
+                    if (partResponse[0] != null) {            
+                        partResponse = partResponse[0]
+                        var etPartInfoHtml = `
+                                                <p><strong>Код детали:</strong> ${partResponse.code}</p>
+                                                <p><strong>Литературный код детали:</strong> ${partResponse.longcode}</p>
+                                                <p><strong>Вес детали:</strong> ${partResponse.weight}</p>
+                                                <p><strong>Объем детали:</strong> ${partResponse.V}</p>
+                                                <p><strong>Флаг неизменности (кода) детали:</strong> ${convertBoolean(partResponse.nochangeflag)}</p>
+                                                <p><strong>Флаг старой детали:</strong> ${convertBoolean(partResponse.old)}</p>
+                                                <p><strong>Флаг удаленности детали:</strong> ${convertBoolean(partResponse.deleted)}</p>
+                                                <p><strong>Флаг разрешенности детали:</strong> ${convertBoolean(partResponse.accepted)}</p>
+                                            `;
+
+                        fetchEtPartsField(partResponse.id, partResponse.producerId)
+
+                        $("#etPartInfo").html(etPartInfoHtml);
+                    } else {
+                        $("#etPartInfo").html('<p>Дополнительные данные не найдены.</p>');
+                    }
+
+
+                },
+                error: function(xhr, status, error) {
+                    alert("Произошла ошибка при получении применимости: " + error);
+                },
+                complete: function() {
+                    $("#additionally").empty();
+                }
+            });
+        });
+
+        function fetchEtPartsField(id, producer_id){
+            $.ajax({
+                url: 'http://109.196.101.10:8000/et_part_field/' + id + '/' + producer_id,  
+                type: 'GET',
+                dataType: 'json',
+                success: function(partFieldResponse) {
+                    $("#etPartInfo").append(`<p><strong>Применимость:</strong> ${partFieldResponse?.data || "Нет данных"}</p>`);
+                },
+                error: function(xhr, status, error) {
+                    alert("Произошла ошибка при получении применимости: " + error);
+                },
+                complete: function() {
+                    $("#loading").hide();
+                }
+            });
+        }
+
         function toggleRows(index, button) {
             const rows = document.querySelectorAll(`.expandable-rows-${index}`);
             const isHidden = rows[0].style.display === 'none';
@@ -341,9 +420,8 @@
             QuantityPerPackingUnit: "Количество в упаковке"
         };
     
-        // Функция для преобразования значений True/False в Да/Нет
         function convertBoolean(value) {
-            if (value === "True") return "Да";
-            if (value === "False") return "Нет";
+            if (value === true || value === "True" || value === "true") return "Да";
+            if (value === false || value === "False" || value === "false") return "Нет";
             return value; // Оставляем значение без изменений, если оно не булево
         }
