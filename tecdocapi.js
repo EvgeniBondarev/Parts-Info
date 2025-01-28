@@ -21,25 +21,25 @@
                             // Перебираем suppliersFromTd и добавляем ссылки
                             if (response.suppliersFromTd && response.suppliersFromTd.length > 0) {
                                 response.suppliersFromTd.forEach(function(item) {
-                                    tdList += '<li><a href="#" class="supplierLink" data-description="' + item.description + '" data-article="' + article + '">' + item.description + '</a></li>';
+                                    tdList += '<li><a href="#" class="supplierLink td-info" data-description="' + item.description + '" data-article="' + article + '">' + item.description + '</a></li>';
                                 });
                             }
 
                             // Перебираем suppliersFromJs и добавляем ссылки
                             if (response.suppliersFromJs && response.suppliersFromJs.length > 0) {
                                 response.suppliersFromJs.forEach(function(item) {
-                                    jsList += '<li><a href="#" class="supplierLink" data-description="' + item.name + '" data-article="' + article + '">' + item.name + '</a> ' + item.rating +'</li>';
+                                    jsList += '<li><a href="#" class="supplierLink jc-info" data-description="' + item.name + '" data-article="' + article + '">' + item.name + '</a> ' + item.rating +'</li>';
                                 });
                             }
 
                             // Выводим список ссылок из suppliersFromTd
                             if (tdList) {
-                                $("#resultList").append('Поставщики из TD2018:<ul class="no-padding">' + tdList + '</ul>');
+                                $("#resultList").append('Поставщики из TD2018:<ul class="no-padding td-info">' + tdList + '</ul>');
                             }
 
                             // Выводим список ссылок из suppliersFromJs
                             if (jsList) {
-                                $("#resultList").append('Поставщики из JCEtalon:<ul class="no-padding">' + jsList + '</ul>');
+                                $("#resultList").append('Поставщики из JCEtalon:<ul class="no-padding jc-info">' + jsList + '</ul>');
                             }
 
                             // Добавляем поле ввода вне списка
@@ -367,7 +367,7 @@
                 },
                 complete: function() {
                     $("#additionally").empty();
-                    $("#loading").hide();
+                   
                 }
             });
         });
@@ -378,7 +378,7 @@
                 type: 'GET',
                 dataType: 'json',
                 success: function(partFieldResponse) {
-                    $("#etPartInfo").append(`<p><strong>Применимость:</strong> ${partFieldResponse?.data || "Нет данных"}</p>`);
+                    $("#etPartInfo").append(`<p><strong>Основная применимость:</strong> ${partFieldResponse?.data || "Нет данных"}</p>`);
                 },
                 error: function(xhr, status, error) {
                     alert("Произошла ошибка при получении применимости: " + error);
@@ -400,10 +400,10 @@
                     $("#etPartInfo").append(`<p><strong>Название:</strong> ${stringResponse?.text || "Нет данных"}</p>`);
                 },
                 error: function(xhr, status, error) {
-                    alert("Произошла ошибка при получении применимости: " + error);
+                    alert("Произошла ошибка при получении названия: " + error);
                 },
                 complete: function() {
-                    
+                    $("#loading").hide();
                 }
             });
         }
