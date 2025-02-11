@@ -1,12 +1,32 @@
 import React from "react";
 
-const SmallCard = ({ title, color = "bg-gray-200" }) => {
+const SmallCard = ({ 
+  title, 
+  color = "from-blue-400 to-blue-600",
+  className = "",
+  onClick
+}) => {
   return (
     <div
-      className={`p-4 rounded-lg shadow-md text-center ${color} text-white 
-        transition-all duration-200 transform hover:-translate-y-1 hover:brightness-95`}
+      onClick={onClick}
+      className={`group relative p-6 rounded-xl shadow-lg hover:shadow-xl 
+        bg-gradient-to-r ${color} 
+        transition-all duration-300 
+        transform hover:-translate-y-1.5 
+        overflow-hidden ${className}`}
     >
-      <h2 className="text-lg font-semibold">{title}</h2>
+      <div className="absolute inset-0 bg-white/10 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      
+      <div className="absolute bottom-0 left-0 w-full h-1 bg-white/20" />
+      
+      <div className="relative">
+        <h2 className="text-xl font-bold text-white drop-shadow-md">
+          {title}
+        </h2>
+        
+        <div className="absolute -top-6 -right-6 w-14 h-14 rounded-full bg-white/10 transform rotate-45" />
+        <div className="absolute -bottom-6 -left-6 w-14 h-14 rounded-full bg-white/10 transform rotate-45" />
+      </div>
     </div>
   );
 };

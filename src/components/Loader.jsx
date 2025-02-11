@@ -1,6 +1,6 @@
 const Loader = () => {
   return (
-    <div className="flex items-center justify-center min-h-screen">
+    <div className="flex items-center justify-center">
       <div className="relative w-64 h-64">
         <div className="absolute w-full h-full rounded-full bg-gradient-to-br from-gray-100 to-gray-200 border-4 border-gray-300 shadow-md">
           {Array.from({ length: 31 }).map((_, index) => {

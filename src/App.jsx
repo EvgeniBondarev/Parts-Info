@@ -3,6 +3,8 @@ import InputSearch from './components/InputSearch';
 import Loader from './components/Loader';
 import { get } from './api/baseRequests'
 import Modal from './components/Modal';
+import SmallCard from './components/SmallCard';
+import FullCard from './components/FullCard';
 
 function App() {
   const [loading, setLoading] = useState(false);
@@ -10,6 +12,7 @@ function App() {
   const [isModalErrorOpen, setIsModalErrorOpen] = useState(false);
   const [searchHistory, setSearchHistory] = useState([]);
   const [inputValue, setInputValue] = useState('');
+  const [selectedArticle, setSelectedArticle] = useState(null);
 
   useEffect(() => {
     const savedHistory = localStorage.getItem('searchHistory');
@@ -24,6 +27,7 @@ function App() {
 
   const findArticle = async (searchQuery) => {
     try {
+      setSelectedArticle(null);
       setLoading(true);
       const url = `suppliers/${searchQuery}`;
       const data = await get(url);
@@ -46,7 +50,7 @@ function App() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-300">
-      <div className="w-full pt-12 sticky top-0 z-10 bg-gray-300">
+      <div className="w-full pt-12 sticky top-0 bg-gray-300">
         <div className={`transition-transform duration-300 scale-90`}>
           <InputSearch 
             handleClick={findArticle}
@@ -61,6 +65,7 @@ function App() {
                   <button
                     key={index}
                     onClick={() => {
+                      setSelectedArticle(null);
                       setInputValue(item);
                       findArticle(item);
                     }}
@@ -75,18 +80,42 @@ function App() {
         </div>
       </div>
 
-      <div className="flex-grow flex items-center justify-center w-full">
-        {loading ? (
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-            <Loader />
-          </div>
-        ) : articles ? (
-          <div className="max-w-3xl w-full p-6 bg-white rounded-2xl shadow-md animate-fade-in mb-8 mx-auto">
-            <h1 className="text-2xl font-bold mb-4">Результат поиска</h1>
-            <p className="text-gray-700">{articles?.suppliersFromJs[0]?.id}</p>
-          </div>
-        ) : (
-          <></>
+      <div className="flex-grow flex w-full transition-all duration-300 z-10">
+        <div className={`transition-all duration-300 ${selectedArticle ? "w-1/4" : "w-full"} p-6`}>
+          {loading ? (
+            <div className="flex justify-center">
+              <Loader />
+            </div>
+          ) : articles ? (
+            <div className="max-w-3xl w-full bg-white rounded-2xl shadow-md animate-fade-in mb-8 mx-auto p-4">
+              <div className="space-y-4">
+                {articles?.suppliersFromJs?.map((item) => (
+                  <SmallCard
+                    key={item.id}
+                    title={`${item.name}${item.marketPrefix ? " / " + item.marketPrefix : ""}`}
+                    color="bg-blue-500"
+                    onClick={() => setSelectedArticle({supplierName: item.name, articleName: inputValue})}
+                  />
+                ))}
+
+                {articles?.suppliersFromTd?.map((item) => (
+                  <SmallCard
+                    key={item.id}
+                    title={item.description}
+                    color="bg-red-500"
+                    onClick={() => setSelectedArticle({supplierName: item.description, articleName: inputValue})} 
+                  />
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </div>
+
+        {selectedArticle && (
+          <FullCard
+            supplierName={selectedArticle.supplierName}
+            articleName={selectedArticle.articleName}
+            onClose={() => setSelectedArticle(null)} />
         )}
       </div>
 
