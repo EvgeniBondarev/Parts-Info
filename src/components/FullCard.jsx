@@ -4,11 +4,19 @@ import Loader from "./Loader";
 import Modal from "./Modal";
 import { get } from "../api/baseRequests";
 import ImageGallery from "./ImageGallery";
+import AdditionalFeatures from "./AdditionalFeatures";
+import CollapsibleTable from "./CollapsibleTable";
+import SmallCard from "./SmallCard";
 
 const FullCard = ({ supplierName, articleName, onClose }) => {
   const [article, setArticle] = useState(null);
+  const [applicablies, setApplicablies] = useState([]);
+
   const [loading, setLoading] = useState(true);
   const [isModalErrorOpen, setIsModalErrorOpen] = useState(false);
+  
+  const [applicableLoading, setApplicableLoading] = useState(false);
+  const [isApplicableErrorOpen, setIsApplicableErrorOpen] = useState(false);
 
   useEffect(() => {
     const fetchArticle = async () => {
@@ -26,6 +34,22 @@ const FullCard = ({ supplierName, articleName, onClose }) => {
     fetchArticle();
   }, [supplierName, articleName]);
 
+  async function findApplicable() {
+    try {
+      setApplicableLoading(true);
+      const data = await get(`substitute/${supplierName}/${articleName}`);
+      if (data.Substitutes.length === 0) {
+        setIsApplicableErrorOpen(true);
+      } else {
+        setApplicablies(data.Substitutes);
+      }
+    } catch (error) {
+      setIsApplicableErrorOpen(true);
+    } finally {
+      setApplicableLoading(false);
+    }
+  }
+
   return (
     <div className="relative w-full max-w-6xl p-6 my-2 flex flex-col bg-white rounded-2xl shadow-md animate-fade-in z-10">
       <button
@@ -41,9 +65,7 @@ const FullCard = ({ supplierName, articleName, onClose }) => {
         </div>
       ) : article ? (
         <div className="flex flex-col w-full">
-          {/* Верхняя часть с двумя колонками */}
           <div className="flex flex-col md:flex-row gap-8 w-full">
-            {/* Левая колонка - Галерея */}
             <div className="md:w-1/4 flex flex-col gap-4">
               <div className="flex-1">
                 {article.img_urls.length === 0 ? (
@@ -54,13 +76,11 @@ const FullCard = ({ supplierName, articleName, onClose }) => {
               </div>
             </div>
 
-            {/* Правая колонка - Основная информация */}
             <div className="md:w-3/4 flex flex-col gap-6">
               <h2 className="text-2xl text-center font-bold text-gray-900 mb-4">
                 Основная информация
               </h2>
 
-              {/* Основные поля */}
               <div className="max-h-[300px] overflow-y-auto pr-4">
                 <div className="space-y-4">
                   <div className="py-2 border-b border-gray-200">
@@ -70,7 +90,6 @@ const FullCard = ({ supplierName, articleName, onClose }) => {
                     </div>
                   </div>
 
-                  {/* Остальные поля */}
                   <div className="py-2 border-b border-gray-200">
                     <div className="flex justify-between">
                       <span className="font-bold text-gray-600 capitalize">Поставщик JC</span>
@@ -99,67 +118,67 @@ const FullCard = ({ supplierName, articleName, onClose }) => {
               </div>
             </div>
           </div>
-          <div className="mt-6 p-6 bg-white rounded-xl shadow-lg border border-gray-100">
-            <h3 className="text-2xl font-bold text-gray-800 mb-6 text-center">
-              Дополнительные характеристики
-            </h3>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {[
-                { title: 'Артикул в нормальном написании (со спецсимволами)', key: 'DataSupplierArticleNumber' },
-                { title: 'Статус изделия', key: 'ArticleStateDisplayValue' },
-                { title: 'Дополнительное описание (примечание)', key: 'Description' },
-                { title: 'Является сопутствующим товаром?', key: 'FlagAccessory' },
-                { title: 'Сертифицированное сырье?', key: 'FlagMaterialCertification' },
-                { title: 'Восстановленное изделие?', key: 'FlagRemanufactured' },
-                { title: 'Поставляется без упаковки?', key: 'FlagSelfServicePacking' },
-                { title: 'Артикул в поисковом написании', key: 'FoundString' },
-                { title: 'Имеет применяемость в осях?', key: 'HasAxle' },
-                { title: 'Имеет применяемость в коммерческих ТС?', key: 'HasCVManuID' },
-                { title: 'Связь с серийными номерами автомобилей', key: 'HasCommercialVehicle' },
-                { title: 'Имеет применяемость в двигателях?', key: 'HasEngine' },
-                { title: 'Имеет применяемость?', key: 'HasLinkitems' },
-                { title: 'Имеет применяемость в мототехнике?', key: 'HasMotorbike' },
-                { title: 'Имеет применяемость в легковых ТС?', key: 'HasPassengerCar' },
-                { title: 'Артикул разрешен к использованию в БД?', key: 'IsValid' },
-                { title: 'Основное описание (наименование)', key: 'NormalizedDescription' },
-                { title: 'Упаковочная единица', key: 'PackingUnit' },
-                { title: 'Количество в упаковке', key: 'QuantityPerPackingUnit' },
-              ].map(({ title, key }) => {
-                const rawValue = article?.article_schema?.[key];
-                const isBoolean = typeof rawValue === 'boolean' || 
-                                  ['true', 'false'].includes(String(rawValue).toLowerCase());
-                
-                const formattedValue = isBoolean 
-                  ? (rawValue === true || String(rawValue).toLowerCase() === 'true' ? 'Да' : 'Нет')
-                  : rawValue || '—';
-          
-                return (
-                  <div 
-                    key={key}
-                    className="group p-4 bg-gray-50 hover:bg-blue-50 rounded-lg transition-all duration-200"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <h4 className="text-sm font-semibold text-gray-500 mb-1">
-                          {title}
-                        </h4>
-                        <span className={`text-lg font-medium ${
-                          isBoolean 
-                            ? formattedValue === 'Да' 
-                              ? 'text-green-600' 
-                              : 'text-red-600'
-                            : 'text-gray-800'
-                        }`}>
-                          {formattedValue}
-                        </span>
+          <AdditionalFeatures article={article} />
+
+          {article.detail_attribute.length !== 0 && (
+            <CollapsibleTable
+              rowLimit={4}
+              titles={['Описание', 'Заголовок', 'Значение']}
+              data={article.detail_attribute.map(item => [item.description, item.displaytitle, item.displayvalue])}/>
+          )}
+          <SmallCard
+            className='w-48 mt-4'
+            textCenter={true}
+            padding="p-2"
+            title='Применимость'
+            color="bg-blue-500"
+            onClick={findApplicable}
+          />
+
+          <div className="mt-4">
+            {applicableLoading
+              ? <Loader />
+              : (applicablies.map((applicable, index) => (
+                <CollapsibleTable
+                  key={index}
+                  rowLimit={4}
+                  titles={['Заголовок', 'Значение']}
+                  data={applicable.Attributes.map(item => [item.Title, item.Value])}
+                >
+                  <div className="bg-gray-50 p-2 rounded-t-xl border-b border-gray-200">
+                    <div className="grid grid-cols-2 gap-4 text-sm justify-items-start">
+                      <div className="space-y-2 mx-6">
+                        <div className="flex items-center">
+                          <span className="text-gray-500">Тип:</span>
+                          <span className="ml-4 font-medium">{applicable?.Type?.trim() || "Не указано"}</span>
+                        </div>
+                        <div className="flex items-center">
+                          <span className="text-gray-500">Имя:</span>
+                          <span className="ml-4 font-medium">{applicable?.Name?.trim() || "Не указано"}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2 mx-6">
+                        <div className="flex items-center">
+                          <span className="text-gray-500">Описание:</span>
+                          <span className="ml-4 font-medium">{applicable?.Modification?.description?.trim() || "Не указано"}</span>
+                        </div>
+                        <div className="flex items-center">
+                          <span className="text-gray-500">Интервал:</span>
+                          <span className="ml-4 font-medium">{applicable?.Modification?.construction_interval?.trim() || "Не указано"}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                );
-              })}
-            </div>
+                </CollapsibleTable>
+            )))}
           </div>
+         
+          <Modal isOpen={isApplicableErrorOpen} onClose={() => { setIsApplicableErrorOpen(false);}}>
+            <h3 className="text-xl font-bold m-4 text-center text-red-600">
+              Применимость не найдена
+            </h3>
+          </Modal>    
         </div>
       ) : (
         <Modal isOpen={isModalErrorOpen} onClose={() => { setIsModalErrorOpen(false); onClose(); }}>

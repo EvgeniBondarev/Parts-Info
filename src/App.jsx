@@ -13,6 +13,26 @@ function App() {
   const [searchHistory, setSearchHistory] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [selectedArticle, setSelectedArticle] = useState(null);
+  const [isVisible, setIsVisible] = useState(true);
+
+  useEffect(() => {
+    const calculateScrollPercentage = () => {
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+      const scrollY = window.scrollY;
+      
+      const scrolledPercentage = (scrollY / (documentHeight - windowHeight)) * 100;
+      return scrolledPercentage;
+    };
+
+    const handleScroll = () => {
+      const scrollPercent = calculateScrollPercentage();
+      setIsVisible(scrollPercent <= 20);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     const savedHistory = localStorage.getItem('searchHistory');
@@ -51,7 +71,7 @@ function App() {
   return (
     <div className="flex flex-col min-h-screen bg-gray-300">
       <div className="w-full pt-12 sticky top-0 bg-gray-300">
-        <div className={`transition-transform duration-300 scale-90`}>
+        <div className={`transition-transform duration-300 scale-90 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-full'}`}>
           <InputSearch 
             handleClick={findArticle}
             inputValue={inputValue}
@@ -81,7 +101,7 @@ function App() {
       </div>
 
       <div className="flex-grow flex w-full transition-all duration-300 z-10">
-        <div className={`transition-all duration-300 ${selectedArticle ? "w-1/4" : "w-full"} p-6`}>
+        <div className={`transition-all duration-300 ${selectedArticle ? "w-1/5" : "w-full"} p-6`}>
           {loading ? (
             <div className="flex justify-center">
               <Loader />
@@ -94,7 +114,7 @@ function App() {
                     key={item.id}
                     title={`${item.name}${item.marketPrefix ? " / " + item.marketPrefix : ""}`}
                     color="bg-blue-500"
-                    onClick={() => setSelectedArticle({supplierName: item.name, articleName: inputValue})}
+                    onClick={() => {setSelectedArticle({supplierName: item.name, articleName: inputValue}); window.scrollTo({top: 0, behavior: 'smooth'});}}
                   />
                 ))}
 
@@ -103,7 +123,7 @@ function App() {
                     key={item.id}
                     title={item.description}
                     color="bg-red-500"
-                    onClick={() => setSelectedArticle({supplierName: item.description, articleName: inputValue})} 
+                    onClick={() => {setSelectedArticle({supplierName: item.description, articleName: inputValue}); window.scrollTo({top: 0, behavior: 'smooth'});}}
                   />
                 ))}
               </div>
@@ -112,10 +132,14 @@ function App() {
         </div>
 
         {selectedArticle && (
-          <FullCard
-            supplierName={selectedArticle.supplierName}
-            articleName={selectedArticle.articleName}
-            onClose={() => setSelectedArticle(null)} />
+          <div className="flex-1 h-auto w-4/5 min-h-full p-4">
+            <FullCard
+              supplierName={selectedArticle.supplierName}
+              articleName={selectedArticle.articleName}
+              onClose={() => setSelectedArticle(null)}
+            />
+        </div>
+        
         )}
       </div>
 

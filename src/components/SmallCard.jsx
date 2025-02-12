@@ -4,12 +4,14 @@ const SmallCard = ({
   title, 
   color = "from-blue-400 to-blue-600",
   className = "",
+  textCenter = false,
+  padding = 'p-6',
   onClick
 }) => {
   return (
     <div
       onClick={onClick}
-      className={`group relative p-6 rounded-xl shadow-lg hover:shadow-xl 
+      className={`group relative ${padding} rounded-xl shadow-lg hover:shadow-xl 
         bg-gradient-to-r ${color} 
         transition-all duration-300 
         transform hover:-translate-y-1.5 
@@ -20,7 +22,7 @@ const SmallCard = ({
       <div className="absolute bottom-0 left-0 w-full h-1 bg-white/20" />
       
       <div className="relative">
-        <h2 className="text-xl font-bold text-white drop-shadow-md">
+        <h2 className={`text-xl ${textCenter ? 'text-center' : ''} font-bold text-white drop-shadow-md`}>
           {title}
         </h2>
         
