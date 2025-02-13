@@ -27,7 +27,7 @@ function App() {
 
     const handleScroll = () => {
       const scrollPercent = calculateScrollPercentage();
-      setIsVisible(scrollPercent <= 20);
+      setIsVisible(scrollPercent <= 10);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
