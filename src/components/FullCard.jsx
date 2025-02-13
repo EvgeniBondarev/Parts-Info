@@ -30,7 +30,7 @@ const FullCard = ({ supplierName, articleName, onClose }) => {
         setLoading(false);
       }
     };
-
+    setApplicablies([]);
     fetchArticle();
   }, [supplierName, articleName]);
 
