@@ -229,6 +229,9 @@
                     // Добавляем ссылку для замещения
                     var substituteLinkHtml = '<br><a href="#" class="substituteLink" data-description="' + description + '" data-article="' + article + '">Применимость</a>';
                     $("#substituteInfo").html(substituteLinkHtml);
+                
+                    $("#mnkData").html('<br><a href="#" class="mnkLink" data-description="' + description + '" data-article="' + article + '">Данные из MNK</a>')
+                    
                 },
                 error: function(xhr, status, error) {
                     alert("Произошла ошибка при получении деталей: " + error);
@@ -368,6 +371,81 @@
                 complete: function() {
                     $("#additionally").empty();
                    
+                }
+            });
+        });
+
+        $(document).on('click', '.mnkLink', function(event) {
+            event.preventDefault();
+            var article = $(this).data('article');
+            var brand = $(this).data('brand');
+        
+            $("#loading").show();
+            $("#mnkInfo").hide().empty();
+        
+            $.ajax({
+                url: 'http://109.196.101.10:8000/pr-part/',
+                type: 'GET',
+                data: { 
+                    article: article,
+                    brand: brand
+                },
+                dataType: 'json',
+                success: function(response) {
+                    $("#mnkData").empty();
+                    $("#mnkInfo").empty();
+        
+                    if (response.length > 0) {
+                        const product = response[0];
+                        
+                        // Основная информация
+                        const mainInfoHtml = `
+                            <h3>${product.article} - ${product.brand}</h3>
+                            <p>Код вендора, с ресурса которого был спаршен продукт: ${product.Vendor_Code}</p>
+                            <p>Код OEM: ${product.OEM_Code || 'N/A'}</p>
+                            <p>Название категории: ${product.Vendor_Category_Name}</p>
+                        `;
+                        $("#mnkData").html(mainInfoHtml);
+        
+                        // Детальная информация
+                        let attributesHtml = '<h4>Атрибуты:</h4><table class="attr-table">';
+                        product.attributes.forEach(attr => {
+                            attributesHtml += `
+                                <tr>
+                                    <td><strong>${attr.name}</strong></td>
+                                    <td>${attr.value}</td>
+                                </tr>
+                            `;
+                        });
+                        attributesHtml += '</table>';
+        
+                        let modelsHtml = '<h4>Применимость:</h4><ul class="model-list">';
+                        product.models.forEach(model => {
+                            modelsHtml += `<li>${model}</li>`;
+                        });
+                        modelsHtml += '</ul>';
+        
+                        let imagesHtml = '<h4>Изображения:</h4><div class="image-gallery">';
+                        product.images.forEach(img => {
+                            imagesHtml += `<img src="${img}" class="thumbnail" style="width: 100px; height: 100px; margin-right: 10px; cursor: pointer;" onclick="window.open('${img}', '_blank')">`;
+                        });
+                        imagesHtml += '</div>';
+
+                        $("#mnkInfo").html(`
+                            <div class="attributes-block">${attributesHtml}</div>
+                            <div class="models-block">${modelsHtml}</div>
+                            <div class="images-block">${imagesHtml}</div>
+                        `).show();
+                        
+                    } else {
+                        $("#mnkData").html("<p>Данные не найдены</p>");
+                    }
+                },
+                error: function(xhr, status, error) {
+                    $("#mnkData").html(`<p class="error">Ошибка загрузки: ${error}</p>`);
+                },
+                complete: function() {
+                    $("#loading").hide();
                 }
             });
         });
