@@ -6,17 +6,31 @@ import { get } from "../api/baseRequests";
 import ImageGallery from "./ImageGallery";
 import AdditionalFeatures from "./AdditionalFeatures";
 import CollapsibleTable from "./CollapsibleTable";
+import MediumCard from "./MediumCard";
 import SmallCard from "./SmallCard";
 
 const FullCard = ({ supplierName, articleName, onClose }) => {
   const [article, setArticle] = useState(null);
-  const [applicablies, setApplicablies] = useState([]);
-
   const [loading, setLoading] = useState(true);
   const [isModalErrorOpen, setIsModalErrorOpen] = useState(false);
   
+  const [description, setDescription] = useState([]);
+  const [showDescription, setShowDescription] = useState(false);
+  const [isDescriptionErrorOpen, setIsDescriptionErrorOpen] = useState(false);
+  
+  const [applicablies, setApplicablies] = useState([]);
   const [applicableLoading, setApplicableLoading] = useState(false);
   const [isApplicableErrorOpen, setIsApplicableErrorOpen] = useState(false);
+  
+  const [mnds, setMnds] = useState([]);
+  const [mndLoading, setMndLoading] = useState(false);
+  const [isMndsErrorOpen, setIsMndsErrorOpen] = useState(false);
+
+  const [JCCross, setJCCross] = useState([]);
+  const [JCCrossLoading, setJCCrossLoading] = useState(false);
+  const [isJCCrossErrorOpen, setIsJCCrossErrorOpen] = useState(false);
+
+  const [activeTab, setActiveTab] = useState(""); 
 
   useEffect(() => {
     const fetchArticle = async () => {
@@ -31,6 +45,10 @@ const FullCard = ({ supplierName, articleName, onClose }) => {
       }
     };
     setApplicablies([]);
+    setMnds([]);
+    setJCCross([]);
+    setActiveTab('');
+    setShowDescription(false);
     fetchArticle();
   }, [supplierName, articleName]);
 
@@ -39,14 +57,70 @@ const FullCard = ({ supplierName, articleName, onClose }) => {
       setApplicableLoading(true);
       const data = await get(`substitute/${supplierName}/${articleName}`);
       if (data.Substitutes.length === 0) {
+        setActiveTab('');
         setIsApplicableErrorOpen(true);
       } else {
         setApplicablies(data.Substitutes);
       }
     } catch (error) {
+      setActiveTab('');
       setIsApplicableErrorOpen(true);
     } finally {
       setApplicableLoading(false);
+    }
+  }
+
+  async function findMnd() {
+    try {
+      setMndLoading(true);
+      const data = await get(`pr-part/?article=${articleName}`);
+      setMnds(data);
+    } catch (error) {
+      setActiveTab('');
+      setIsMndsErrorOpen(true);
+    } finally {
+      setMndLoading(false);
+    }
+  }
+
+  async function findJCCross() {
+    try {
+      setJCCrossLoading(true);
+      const data = await get(`cr-t-cross/maincode/${articleName}`);
+      if (data.length === 0) {
+        setActiveTab('');
+        setIsJCCrossErrorOpen(true);
+      } else {
+        setJCCross(data);
+      }
+    } catch (error) {
+      setActiveTab('');
+      setIsJCCrossErrorOpen(true);
+    } finally {
+      setJCCrossLoading(false);
+    }
+  }
+
+  async function findDescription() {
+    try {
+      const data = await get(`et-part/${articleName}/${article?.supplier_from_jc?.id}`);
+      if (data.length > 0) {
+        setShowDescription(true);
+        setDescription([
+          {name: 'Код детали', value: data[0]?.code},
+          {name: 'Литературный код детали', value: data[0]?.longcode},
+          {name: 'Вес детали', value: data[0]?.weight},
+          {name: 'Объем детали', value: data[0]?.V},
+          {name: 'Флаг неизменности (кода) детали', value: data[0]?.nochangeflag ? 'Да': 'Нет'},
+          {name: 'Флаг старой детали', value: data[0]?.old ? 'Да': 'Нет'},
+          {name: 'Флаг удаленности детали', value: data[0]?.deleted ? 'Да': 'Нет'},
+          {name: 'Флаг разрешенности детали', value: data[0]?.accepted ? 'Да': 'Нет'},
+        ]);
+      } else {
+        setIsDescriptionErrorOpen(true);
+      }
+    } catch (error) {
+      setIsDescriptionErrorOpen(true);
     }
   }
 
@@ -77,11 +151,11 @@ const FullCard = ({ supplierName, articleName, onClose }) => {
             </div>
 
             <div className="md:w-3/4 flex flex-col gap-6">
-              <h2 className="text-2xl text-center font-bold text-gray-900 mb-4">
+              <h2 className="text-xl text-center font-bold text-gray-900 mb-4">
                 Основная информация
               </h2>
 
-              <div className="max-h-[300px] overflow-y-auto pr-4">
+              <div className="max-h-[300px] overflow-y-auto pr-4 text-sm">
                 <div className="space-y-4">
                   <div className="py-2 border-b border-gray-200">
                     <div className="flex justify-between">
@@ -114,6 +188,36 @@ const FullCard = ({ supplierName, articleName, onClose }) => {
                       </span>
                     </div>
                   </div>
+
+                  {showDescription ? (
+                    <>
+                      {description.map((item, key) => (
+                        <div className="py-2 border-b border-gray-200" key={key}>
+                          <div className="flex justify-between">
+                            <span className="font-bold text-gray-600 capitalize">{item.name}</span>
+                            {item.value == null ? (
+                              <Loader />
+                            ) : (
+                              <span className="text-gray-800">{item?.value ?? "Не указано"}</span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </>
+                  ) : (
+                    <div className="pb-2">
+                      <div className="flex justify-between">
+                        <span className="font-bold text-gray-600 capitalize"></span>
+                        <SmallCard
+                          title={"Дополнительно"}
+                          color="bg-blue-500"
+                          textCenter={true}
+                          padding="p-2"
+                          onClick={findDescription}
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -124,61 +228,134 @@ const FullCard = ({ supplierName, articleName, onClose }) => {
             <CollapsibleTable
               rowLimit={4}
               titles={['Описание', 'Заголовок', 'Значение']}
-              data={article.detail_attribute.map(item => [item.description, item.displaytitle, item.displayvalue])}/>
+              data={article.detail_attribute.map(item => [item.description, item.displaytitle, item.displayvalue])}
+            />
           )}
-          <SmallCard
-            className='w-48 mt-4'
-            textCenter={true}
-            padding="p-2"
-            title='Применимость'
-            color="bg-blue-500"
-            onClick={findApplicable}
-          />
 
-          <div className="mt-4">
-            {applicableLoading
-              ? <Loader />
-              : (applicablies.map((applicable, index) => (
-                <CollapsibleTable
-                  key={index}
-                  rowLimit={4}
-                  titles={['Заголовок', 'Значение']}
-                  data={applicable.Attributes.map(item => [item.Title, item.Value])}
-                >
-                  <div className="bg-gray-50 p-2 rounded-t-xl border-b border-gray-200">
-                    <div className="grid grid-cols-2 gap-4 text-sm justify-items-start">
-                      <div className="space-y-2 mx-6">
-                        <div className="flex items-center">
-                          <span className="text-gray-500">Тип:</span>
-                          <span className="ml-4 font-medium">{applicable?.Type?.trim() || "Не указано"}</span>
+         <div className="flex border-b border-gray-200 mt-4">
+            <button
+              onClick={() => {setActiveTab("section1"); findApplicable();}}
+              className={`flex-1 py-2 px-4 text-center font-medium ${
+                activeTab === "section1"
+                  ? "text-blue-600 border-b-2 border-blue-600"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              Применимость
+            </button>
+            <button
+              onClick={() => {setActiveTab("section2"); findMnd();}}
+              className={`flex-1 py-2 px-4 text-center font-medium ${
+                activeTab === "section2"
+                  ? "text-blue-600 border-b-2 border-blue-600"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              Данные из MNK
+            </button>
+            <button
+              onClick={() => {setActiveTab("section3"); findJCCross();}}
+              className={`flex-1 py-2 px-4 text-center font-medium ${
+                activeTab === "section3"
+                  ? "text-blue-600 border-b-2 border-blue-600"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              Кросскоды из JCCross
+            </button>
+          </div>
+
+          {activeTab === "section1" && (
+            <div className="mt-4">
+              {applicableLoading ? (
+                <Loader />
+              ) : (
+                applicablies.map((applicable, index) => (
+                  <CollapsibleTable
+                    key={index}
+                    rowLimit={4}
+                    titles={['Заголовок', 'Значение']}
+                    data={applicable.Attributes.map(item => [item.Title, item.Value])}
+                  >
+                    <div className="bg-gray-50 p-2 rounded-t-xl border-b border-gray-200">
+                      <div className="grid grid-cols-2 gap-4 text-sm justify-items-start">
+                        <div className="space-y-2 mx-6">
+                          <div className="flex items-center">
+                            <span className="text-gray-500">Тип:</span>
+                            <span className="ml-4 font-medium">{applicable?.Type?.trim() || "Не указано"}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <span className="text-gray-500">Имя:</span>
+                            <span className="ml-4 font-medium">{applicable?.Name?.trim() || "Не указано"}</span>
+                          </div>
                         </div>
-                        <div className="flex items-center">
-                          <span className="text-gray-500">Имя:</span>
-                          <span className="ml-4 font-medium">{applicable?.Name?.trim() || "Не указано"}</span>
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-2 mx-6">
-                        <div className="flex items-center">
-                          <span className="text-gray-500">Описание:</span>
-                          <span className="ml-4 font-medium">{applicable?.Modification?.description?.trim() || "Не указано"}</span>
-                        </div>
-                        <div className="flex items-center">
-                          <span className="text-gray-500">Интервал:</span>
-                          <span className="ml-4 font-medium">{applicable?.Modification?.construction_interval?.trim() || "Не указано"}</span>
+
+                        <div className="space-y-2 mx-6">
+                          <div className="flex items-center">
+                            <span className="text-gray-500">Описание:</span>
+                            <span className="ml-4 font-medium">{applicable?.Modification?.description?.trim() || "Не указано"}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <span className="text-gray-500">Интервал:</span>
+                            <span className="ml-4 font-medium">{applicable?.Modification?.construction_interval?.trim() || "Не указано"}</span>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </CollapsibleTable>
-            )))}
-          </div>
-         
-          <Modal isOpen={isApplicableErrorOpen} onClose={() => { setIsApplicableErrorOpen(false);}}>
+                  </CollapsibleTable>
+                ))
+              )}
+            </div>
+          )}
+
+          {activeTab === "section2" && (
+            <div className="mt-4">
+              {mndLoading ? (
+                <Loader />
+              ) : (
+                mnds.map((mnd, index) => (
+                    <div className="m-1" key={index}>
+                      <MediumCard model={mnd}/>
+                    </div>
+                ))
+              )}
+            </div>
+          )}
+
+          {activeTab === "section3" && (
+            <div className="mt-4">
+              {JCCrossLoading ? (
+                <Loader />
+              ) : (
+                  <CollapsibleTable
+                    rowLimit={4}
+                    titles={['Кросскод', 'Производитель', 'Префикс']}
+                    data={JCCross.map(item => [item?.cr_bycode, item?.et_producer?.name, item?.et_producer?.marketPrefix])}
+                  />
+              )}
+            </div>
+          )}
+
+          <Modal isOpen={isApplicableErrorOpen} onClose={() => { setIsApplicableErrorOpen(false); }}>
             <h3 className="text-xl font-bold m-4 text-center text-red-600">
               Применимость не найдена
             </h3>
-          </Modal>    
+          </Modal>
+          <Modal isOpen={isMndsErrorOpen} onClose={() => { setIsMndsErrorOpen(false); }}>
+            <h3 className="text-xl font-bold m-4 text-center text-red-600">
+              MND не найден
+            </h3>
+          </Modal>
+          <Modal isOpen={isJCCrossErrorOpen} onClose={() => { setIsJCCrossErrorOpen(false); }}>
+            <h3 className="text-xl font-bold m-4 text-center text-red-600">
+              JCCross не найден
+            </h3>
+          </Modal>
+          <Modal isOpen={isDescriptionErrorOpen} onClose={() => { setIsDescriptionErrorOpen(false); }}>
+            <h3 className="text-xl font-bold m-4 text-center text-red-600">
+              Описание не найдено
+            </h3>
+          </Modal>
         </div>
       ) : (
         <Modal isOpen={isModalErrorOpen} onClose={() => { setIsModalErrorOpen(false); onClose(); }}>

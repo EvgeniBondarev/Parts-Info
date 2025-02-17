@@ -14,7 +14,7 @@ const InputSearch = ({ handleClick, inputValue, setInputValue }) => {
         onChange={(e) => setInputValue(e.target.value)}
         type="text"
         placeholder="Введите артикул детали"
-        className="w-full px-6 py-4 bg-gray-100 rounded-l-2xl text-gray-700 outline-none placeholder-gray-500 text-lg"
+        className="w-full px-4 bg-gray-100 rounded-l-2xl text-gray-700 outline-none placeholder-gray-500 text-lg"
         onKeyPress={(e) => (e.key === 'Enter' && inputValue) && handleSearch()}
       />
       <button 

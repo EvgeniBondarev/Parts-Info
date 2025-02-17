@@ -16,18 +16,8 @@ function App() {
   const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
-    const calculateScrollPercentage = () => {
-      const windowHeight = window.innerHeight;
-      const documentHeight = document.documentElement.scrollHeight;
-      const scrollY = window.scrollY;
-      
-      const scrolledPercentage = (scrollY / (documentHeight - windowHeight)) * 100;
-      return scrolledPercentage;
-    };
-
     const handleScroll = () => {
-      const scrollPercent = calculateScrollPercentage();
-      setIsVisible(scrollPercent <= 10);
+      setIsVisible(window.scrollY <= 500);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -57,7 +47,33 @@ function App() {
         return newHistory.slice(0, 5);
       });
       
-      setArticles(data);
+      let suppliersFromJs = data.suppliersFromJs;
+      let suppliersFromTd =data.suppliersFromTd;
+      let suppliersFromTdAndJs = [];
+
+      for (let i = 0; i < suppliersFromTd.length; i++) {
+        let needToAdd = false;
+        for (let j = 0; j < suppliersFromJs.length; j++) {
+          if (suppliersFromTd[i].id == suppliersFromJs[j].tecdocSupplierId) {
+            suppliersFromJs = suppliersFromJs.filter((_, index) => index !== j);
+            j--;
+            needToAdd = true;
+          }
+        }
+
+        if (needToAdd){
+          suppliersFromTdAndJs.push(suppliersFromTd[i]);
+          suppliersFromTd = suppliersFromTd.filter((_, index) => index !== i);
+        }
+      }
+
+      console.log(suppliersFromTdAndJs);
+
+      setArticles({
+        suppliersFromTd: suppliersFromTd,
+        suppliersFromJs: suppliersFromJs,
+        suppliersFromTdAndJs: suppliersFromTdAndJs
+      });
     }
     catch {
       setArticles(null);
@@ -70,7 +86,7 @@ function App() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-300">
-      <div className="w-full pt-12 sticky top-0 bg-gray-300">
+      <div className="w-full pt-6 sticky top-0 bg-gray-300">
         <div className={`transition-transform duration-300 scale-90 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-full'}`}>
           <InputSearch 
             handleClick={findArticle}
@@ -109,12 +125,13 @@ function App() {
           ) : articles ? (
             <div className="max-w-3xl w-full bg-white rounded-2xl shadow-md animate-fade-in mb-8 mx-auto p-4">
               <div className="space-y-4">
-                {articles?.suppliersFromJs?.map((item) => (
+                {articles?.suppliersFromTdAndJs?.map((item) => (
                   <SmallCard
                     key={item.id}
-                    title={`${item.name}${item.marketPrefix ? " / " + item.marketPrefix : ""}`}
-                    color="bg-blue-500"
-                    onClick={() => {setSelectedArticle({supplierName: item.name, articleName: inputValue}); window.scrollTo({top: 0, behavior: 'smooth'});}}
+                    title={item.description}
+                    splitFrom="from-red-500"
+                    splitTo="to-blue-500"
+                    onClick={() => {setSelectedArticle({supplierName: item.description, articleName: inputValue}); window.scrollTo({top: 0, behavior: 'smooth'});}}
                   />
                 ))}
 
@@ -122,10 +139,19 @@ function App() {
                   <SmallCard
                     key={item.id}
                     title={item.description}
-                    color="bg-red-500"
+                    color='bg-red-500'
                     onClick={() => {setSelectedArticle({supplierName: item.description, articleName: inputValue}); window.scrollTo({top: 0, behavior: 'smooth'});}}
                   />
                 ))}
+                
+                {articles?.suppliersFromJs?.map((item) => (
+                  <SmallCard
+                    key={item.id}
+                    title={`${item.name}${item.marketPrefix ? " / " + item.marketPrefix : ""}`}
+                    color='bg-blue-500'
+                    onClick={() => {setSelectedArticle({supplierName: item.name, articleName: inputValue}); window.scrollTo({top: 0, behavior: 'smooth'});}}
+                  />
+                ))}                
               </div>
             </div>
           ) : null}

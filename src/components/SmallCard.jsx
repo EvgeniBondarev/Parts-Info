@@ -1,18 +1,24 @@
 import React from "react";
 
 const SmallCard = ({ 
-  title, 
-  color = "from-blue-400 to-blue-600",
+  title,
+  splitFrom,
+  splitTo,
+  color,
   className = "",
   textCenter = false,
-  padding = 'p-4',
+  padding = 'p-3',
   onClick
 }) => {
+  const gradientClasses = splitFrom && splitTo 
+    ? `bg-[linear-gradient(135deg,var(--tw-gradient-from)_50%,var(--tw-gradient-to)_50%)] ${splitFrom} ${splitTo}`
+    : `bg-gradient-to-r ${color}`;
+
   return (
     <div
       onClick={onClick}
       className={`group relative ${padding} rounded-xl shadow-lg hover:shadow-xl cursor-pointer
-        bg-gradient-to-r ${color} 
+        ${gradientClasses}
         transition-all duration-300 
         transform hover:-translate-y-1.5 
         overflow-hidden ${className}`}
@@ -22,7 +28,7 @@ const SmallCard = ({
       <div className="absolute bottom-0 left-0 w-full h-1 bg-white/20" />
       
       <div className="relative">
-        <h2 className={`text-xl ${textCenter ? 'text-center' : ''}  font-bold text-white drop-shadow-md`}>
+        <h2 className={`text-base ${textCenter ? 'text-center' : ''} font-bold text-white drop-shadow-md`}>
           {title}
         </h2>
         

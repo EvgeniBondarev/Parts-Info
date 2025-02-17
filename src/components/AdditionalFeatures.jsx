@@ -34,8 +34,8 @@ const AdditionalFeatures = ({ article }) => {
 
   return (
     <div className="mt-6 p-6 bg-white rounded-xl shadow-lg border border-gray-100">
-      <div className="flex justify-between text-cen items-center mb-6">
-        <h3 className="text-2xl font-bold text-gray-800">
+      <div className="flex justify-between items-center mb-6">
+        <h3 className="text-xl font-bold text-gray-800">
           Дополнительные характеристики
         </h3>
         <button
@@ -76,7 +76,7 @@ const AdditionalFeatures = ({ article }) => {
                   <h4 className="text-sm font-semibold text-gray-500 mb-1">
                     {title}
                   </h4>
-                  <span className={`text-lg font-medium ${
+                  <span className={`text-sm font-medium ${
                     isBoolean 
                       ? formattedValue === 'Да' 
                         ? 'text-green-600' 
