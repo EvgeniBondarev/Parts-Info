@@ -51,23 +51,16 @@ function App() {
       let suppliersFromTd =data.suppliersFromTd;
       let suppliersFromTdAndJs = [];
 
-      for (let i = 0; i < suppliersFromTd.length; i++) {
-        let needToAdd = false;
-        for (let j = 0; j < suppliersFromJs.length; j++) {
-          if (suppliersFromTd[i].id == suppliersFromJs[j].tecdocSupplierId) {
-            suppliersFromJs = suppliersFromJs.filter((_, index) => index !== j);
-            j--;
-            needToAdd = true;
-          }
+      suppliersFromTd = suppliersFromTd.filter(supplierFromTd => {
+        const matchIndex = suppliersFromJs.findIndex(supplierFromJs => Number(supplierFromJs.tecdocSupplierId) === supplierFromTd.id);
+      
+        if (matchIndex !== -1) {
+          suppliersFromTdAndJs.push({ ...supplierFromTd, ...suppliersFromJs[matchIndex] });
+          suppliersFromJs.splice(matchIndex, 1);
+          return false;
         }
-
-        if (needToAdd){
-          suppliersFromTdAndJs.push(suppliersFromTd[i]);
-          suppliersFromTd = suppliersFromTd.filter((_, index) => index !== i);
-        }
-      }
-
-      console.log(suppliersFromTdAndJs);
+        return true;
+      });
 
       setArticles({
         suppliersFromTd: suppliersFromTd,
