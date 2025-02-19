@@ -47,20 +47,45 @@ function App() {
         return newHistory.slice(0, 5);
       });
       
-      let suppliersFromJs = data.suppliersFromJs;
-      let suppliersFromTd =data.suppliersFromTd;
+      let suppliersFromJs = data.suppliersFromJs.map(item => ({
+        id: Number(item.tecdocSupplierId),
+        prefix: item.marketPrefix ? item.marketPrefix : item.prefix,
+        name: `${item.name}${item.marketPrefix ? " / " + item.marketPrefix : ""}`,
+        queryName: item.name
+      }));
+      let suppliersFromTd = data.suppliersFromTd.map(item => ({
+        id: item.id,
+        prefix: item.matchcode,
+        name: item.description
+      }));
       let suppliersFromTdAndJs = [];
 
       suppliersFromTd = suppliersFromTd.filter(supplierFromTd => {
-        const matchIndex = suppliersFromJs.findIndex(supplierFromJs => Number(supplierFromJs.tecdocSupplierId) === supplierFromTd.id);
-      
-        if (matchIndex !== -1) {
-          suppliersFromTdAndJs.push({ ...supplierFromTd, ...suppliersFromJs[matchIndex] });
-          suppliersFromJs.splice(matchIndex, 1);
-          return false;
-        }
-        return true;
+        let matchIndex = -1;
+        let needToFilter = true;
+        do {
+          matchIndex = suppliersFromJs.findIndex(supplierFromJs =>
+            supplierFromJs.id === supplierFromTd.id ||
+            supplierFromJs.prefix === supplierFromTd.prefix ||
+            supplierFromJs.prefix.toLowerCase().includes(supplierFromTd.prefix.toLowerCase()) ||
+            supplierFromTd.prefix.toLowerCase().includes(supplierFromJs.prefix.toLowerCase()));
+        
+          if (matchIndex !== -1) {
+            suppliersFromTdAndJs.push({
+              id: supplierFromTd.id,
+              name: suppliersFromJs[matchIndex].queryName,
+              firstName: supplierFromTd.name,
+              secondName: suppliersFromJs[matchIndex].name,
+            });
+            suppliersFromJs.splice(matchIndex, 1);
+            needToFilter = false;
+          }
+        } while (matchIndex !== -1)
+
+        return needToFilter;
       });
+
+      suppliersFromTdAndJs = removeDuplicatesByField(suppliersFromTdAndJs, "id");
 
       setArticles({
         suppliersFromTd: suppliersFromTd,
@@ -75,6 +100,18 @@ function App() {
     finally {
       setLoading(false);
     }
+  };
+
+  const removeDuplicatesByField = (arr, field) => {
+    const seen = new Set();
+    return arr.filter(item => {
+      const fieldValue = item[field];
+      if (seen.has(fieldValue)) {
+        return false;
+      }
+      seen.add(fieldValue);
+      return true; 
+    });
   };
 
   return (
@@ -118,31 +155,32 @@ function App() {
           ) : articles ? (
             <div className="max-w-3xl w-full bg-white rounded-2xl shadow-md animate-fade-in mb-8 mx-auto p-4">
               <div className="space-y-4">
-                {articles?.suppliersFromTdAndJs?.map((item) => (
+                {articles?.suppliersFromTdAndJs?.map((item, index) => (
                   <SmallCard
-                    key={item.id}
-                    title={item.description}
+                    key={index}
+                    titleLeft={item.firstName}
+                    titleRight={item.secondName}
                     splitFrom="from-red-500"
                     splitTo="to-blue-500"
-                    onClick={() => {setSelectedArticle({supplierName: item.description, articleName: inputValue}); window.scrollTo({top: 0, behavior: 'smooth'});}}
+                    onClick={() => {setSelectedArticle({supplierName: item.name, articleName: inputValue}); window.scrollTo({top: 0, behavior: 'smooth'});}}
                   />
                 ))}
 
-                {articles?.suppliersFromTd?.map((item) => (
+                {articles?.suppliersFromTd?.map((item, index) => (
                   <SmallCard
-                    key={item.id}
-                    title={item.description}
+                    key={index}
+                    titleLeft={item.name}
                     color='bg-red-500'
-                    onClick={() => {setSelectedArticle({supplierName: item.description, articleName: inputValue}); window.scrollTo({top: 0, behavior: 'smooth'});}}
+                    onClick={() => {setSelectedArticle({supplierName: item.name, articleName: inputValue}); window.scrollTo({top: 0, behavior: 'smooth'});}}
                   />
                 ))}
                 
-                {articles?.suppliersFromJs?.map((item) => (
+                {articles?.suppliersFromJs?.map((item, index) => (
                   <SmallCard
-                    key={item.id}
-                    title={`${item.name}${item.marketPrefix ? " / " + item.marketPrefix : ""}`}
+                    key={index}
+                    titleLeft={item.queryName}
                     color='bg-blue-500'
-                    onClick={() => {setSelectedArticle({supplierName: item.name, articleName: inputValue}); window.scrollTo({top: 0, behavior: 'smooth'});}}
+                    onClick={() => {setSelectedArticle({supplierName: item.queryName, articleName: inputValue}); window.scrollTo({top: 0, behavior: 'smooth'});}}
                   />
                 ))}                
               </div>
@@ -151,13 +189,13 @@ function App() {
         </div>
 
         {selectedArticle && (
-          <div className="flex-1 h-auto w-4/5 min-h-full p-4">
+          <div className="flex-1 h-auto w-full min-h-full p-4">
             <FullCard
               supplierName={selectedArticle.supplierName}
               articleName={selectedArticle.articleName}
               onClose={() => setSelectedArticle(null)}
             />
-        </div>
+          </div>
         
         )}
       </div>

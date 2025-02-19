@@ -1,12 +1,12 @@
 import React from "react";
 
 const SmallCard = ({ 
-  title,
+  titleLeft, // Текст слева
+  titleRight, // Текст справа
   splitFrom,
   splitTo,
   color,
   className = "",
-  textCenter = false,
   padding = 'p-3',
   onClick
 }) => {
@@ -28,10 +28,24 @@ const SmallCard = ({
       <div className="absolute bottom-0 left-0 w-full h-1 bg-white/20" />
       
       <div className="relative">
-        <h2 className={`text-base ${textCenter ? 'text-center' : ''} font-bold text-white drop-shadow-md`}>
-          {title}
-        </h2>
+        {/* Контейнер для текста */}
+        <div className="flex justify-between items-center">
+          {/* Текст слева */}
+          {titleLeft && (
+            <h2 className="text-base text-left font-bold text-white drop-shadow-md">
+              {titleLeft}
+            </h2>
+          )}
+
+          {/* Текст справа */}
+          {titleRight && (
+            <h2 className="text-base text-right font-bold text-white drop-shadow-md">
+              {titleRight}
+            </h2>
+          )}
+        </div>
         
+        {/* Декоративные элементы */}
         <div className="absolute -top-6 -right-6 w-14 h-14 rounded-full bg-white/10 transform rotate-45" />
         <div className="absolute -bottom-6 -left-6 w-14 h-14 rounded-full bg-white/10 transform rotate-45" />
       </div>

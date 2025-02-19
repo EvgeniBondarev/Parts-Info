@@ -44,6 +44,8 @@ const FullCard = ({ supplierName, articleName, onClose }) => {
         setLoading(false);
       }
     };
+    
+    setArticle(null);
     setApplicablies([]);
     setMnds([]);
     setJCCross([]);
@@ -125,7 +127,7 @@ const FullCard = ({ supplierName, articleName, onClose }) => {
   }
 
   return (
-    <div className="relative w-full max-w-6xl p-6 my-2 flex flex-col bg-white rounded-2xl shadow-md animate-fade-in z-10">
+    <div className="relative w-full p-6 my-2 flex flex-col bg-white rounded-2xl shadow-md animate-fade-in z-10">
       <button
         onClick={onClose}
         className="absolute top-4 right-4 text-gray-700 hover:text-gray-900 z-5"
