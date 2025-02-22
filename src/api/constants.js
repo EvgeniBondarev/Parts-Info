@@ -8,7 +8,6 @@ export const CAR_MANUFACTURERS = [
   "bmw",
   "bugatti",
   "cadillac",
-  "changan",
   "chevrolet",
   "chrysler",
   "citroën",
