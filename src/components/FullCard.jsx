@@ -8,6 +8,7 @@ import AdditionalFeatures from "./AdditionalFeatures";
 import CollapsibleTable from "./CollapsibleTable";
 import MediumCard from "./MediumCard";
 import SmallCard from "./SmallCard";
+import ApplicableList from "./ApplicableList";
 
 const FullCard = ({ supplierName, articleName, onClose }) => {
   const [article, setArticle] = useState(null);
@@ -272,40 +273,7 @@ const FullCard = ({ supplierName, articleName, onClose }) => {
               {applicableLoading ? (
                 <Loader />
               ) : (
-                applicablies.map((applicable, index) => (
-                  <CollapsibleTable
-                    key={index}
-                    rowLimit={4}
-                    titles={['Заголовок', 'Значение']}
-                    data={applicable.Attributes.map(item => [item.Title, item.Value])}
-                  >
-                    <div className="bg-gray-50 p-2 rounded-t-xl border-b border-gray-200">
-                      <div className="grid grid-cols-2 gap-4 text-sm justify-items-start">
-                        <div className="space-y-2 mx-6">
-                          <div className="flex items-center">
-                            <span className="text-gray-500">Тип:</span>
-                            <span className="ml-4 font-medium">{applicable?.Type?.trim() || "Не указано"}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <span className="text-gray-500">Имя:</span>
-                            <span className="ml-4 font-medium">{applicable?.Name?.trim() || "Не указано"}</span>
-                          </div>
-                        </div>
-
-                        <div className="space-y-2 mx-6">
-                          <div className="flex items-center">
-                            <span className="text-gray-500">Описание:</span>
-                            <span className="ml-4 font-medium">{applicable?.Modification?.description?.trim() || "Не указано"}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <span className="text-gray-500">Интервал:</span>
-                            <span className="ml-4 font-medium">{applicable?.Modification?.construction_interval?.trim() || "Не указано"}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </CollapsibleTable>
-                ))
+                <ApplicableList model={applicablies} />
               )}
             </div>
           )}

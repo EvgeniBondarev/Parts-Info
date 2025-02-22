@@ -40,7 +40,7 @@ const Modal = ({ isOpen, onClose, children }) => {
       onClick={handleClose}
     >
       <div 
-        className={`relative bg-white/90 backdrop-blur-lg rounded-xl p-6 max-w-md w-full shadow-xl transform transition-all duration-300 ${
+        className={`relative bg-white/90 backdrop-blur-lg rounded-xl p-6 w-auto max-w-full max-h-[90vh] overflow-y-auto shadow-xl transform transition-all duration-300 ${
           isAnimating ? 'scale-100' : 'scale-95'
         }`}
         onClick={(e) => e.stopPropagation()}
