@@ -110,6 +110,9 @@
                     $("#etPartInfo").empty();
                     $("#additionally").empty();
                     $("#partsApi").empty();
+                    $("#mnkInfo").empty();
+                    $("#jscrossInfo").empty();
+                    $("#volnaInfo").empty();
 
                     // Показываем изображения
                     if (detailResponse.img_urls && detailResponse.img_urls.length > 0) {
@@ -231,6 +234,8 @@
                     $("#substituteInfo").html(substituteLinkHtml);
                 
                     $("#mnkData").html('<br><a href="#" class="mnkLink" data-description="' + description + '" data-article="' + article + '">Данные из MNK</a>')
+                    $("#jscrossData").html('<br><a href="#" class="jscrossLink" data-article="' + article + '">Кросскоды из JCCross</a>')
+                    $("#volnaData").html('<br><a href="#" class="volnaLink" data-article="' + article + '">Парсер Volna Parts</a>')
                     
                 },
                 error: function(xhr, status, error) {
@@ -449,6 +454,135 @@
                 }
             });
         });
+
+        $(document).on('click', '.jscrossLink', function(event) {
+            event.preventDefault();
+            var article = $(this).data('article');
+
+            $("#loading").show();
+            $("#jscrossInfo").hide().empty();
+            
+            $.ajax({
+                url: 'http://109.196.101.10:8000/cr-t-cross/maincode/' + article,
+                method: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    $("#jscrossData").empty();
+                    $("#jscrossInfo").empty();
+                    if (!response.length) {
+                        $('#jscrossInfo').html('<p>Нет данных</p>').show();
+                        return;
+                    }
+                    
+                    var html = `
+                        <div class="part-section">
+                            <h5>${article}</h5>
+                            <table border="1" class="replacements-table">
+                                <thead>
+                                    <tr>
+                                        <th>Бренд</th>
+                                        <th>Заменитель</th>
+                                        <th>Оригинальный код</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${response.map(item => `
+                                        <tr>
+                                            <td>${item.et_producer ? item.et_producer.name : 'Неизвестно'}</td>
+                                            <td>${item.cr_crosscode}</td>
+                                            <td>${item.cr_maincode}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>`;
+                    
+                    $('#jscrossInfo').html(html).show();
+                },
+                error: function() {
+                    $('#jscrossInfo').html('<p>Ошибка загрузки данных</p>').show();
+                },
+                complete: function() {
+                    $("#loading").hide();
+                }
+            });
+        });        
+        
+        
+        $(document).on('click', '.volnaLink', function(event) {
+            event.preventDefault();
+            var article = $(this).data('article');
+        
+            $("#loading").show();
+            $("#volnaInfo").hide().empty();
+        
+            $.ajax({
+                url: 'http://109.196.101.10:8000/volna-parts/part/' + article,
+                type: 'GET',
+                dataType: 'json',
+                success: function(responses) {
+                    $("#volnassData").empty();
+                    $("#volnaInfo").empty();
+                
+                    if (responses) {
+                        var dataHtml = ""
+                        responses.forEach(function(response){
+                            dataHtml += `
+                            <div class="volna-container">
+                                <h4>${response.name}</h4>
+                                
+                                <div class="main-info">
+                                    ${response.images.length > 0 ? 
+                                        `<img src="${response.images[0]}" class="main-image" alt="Основное изображение">` : 
+                                        ''
+                                    }
+                                    
+                                    <table class="specifications">
+                                        <tbody>
+                                            ${Object.entries(response.specifications).map(([key, value]) => `
+                                                <tr>
+                                                    <td><strong>${key}</strong></td>
+                                                    <td>${value}</td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                    
+                                <h5>Заменители:</h5>
+                                <div class="replacements-grid">
+                                    ${response.replacements.map(repl => `
+                                        <div class="replacement-card">
+                                            <div class="card-header">
+                                                ${repl.image ? 
+                                                    `<img src="${repl.image}" class="replacement-image" alt="${repl.brand}">` : 
+                                                    '<div class="no-image">Нет изображения</div>'
+                                                }
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="brand">${repl.brand.replace('+', ' ')}</div>
+                                                <div class="article">Артикул: ${repl.article}</div>
+                                                <div class="price">Цена: ${repl.price ? repl.price.toFixed(2) + ' р.' : '—'}</div>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>`;
+                        });
+
+                        $("#volnaInfo").html(dataHtml).show();
+                    } else {
+                        $("#volnaInfo").html("<p>Данные не найдены</p>");
+                    }
+                },
+                error: function(xhr, status, error) {
+                    $("#volnaData").html(`<p class="error">Ошибка загрузки: ${error}</p>`);
+                },
+                complete: function() {
+                    $("#loading").hide();
+                }
+            });
+        });        
 
         function fetchEtPartsField(id, producer_id){
             $.ajax({
