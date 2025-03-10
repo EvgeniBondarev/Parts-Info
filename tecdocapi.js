@@ -113,6 +113,9 @@
                     $("#mnkInfo").empty();
                     $("#jscrossInfo").empty();
                     $("#volnaInfo").empty();
+                    $("#mnkInfo").empty();
+                    $("#jscrossInfo").empty();
+                    $("#volnaInfo").empty();
 
                     // Показываем изображения
                     if (detailResponse.img_urls && detailResponse.img_urls.length > 0) {
@@ -232,6 +235,11 @@
                     // Добавляем ссылку для замещения
                     var substituteLinkHtml = '<br><a href="#" class="substituteLink" data-description="' + description + '" data-article="' + article + '">Применимость</a>';
                     $("#substituteInfo").html(substituteLinkHtml);
+                
+                    $("#mnkData").html('<br><a href="#" class="mnkLink" data-description="' + description + '" data-article="' + article + '">Данные из MNK</a>')
+                    $("#jscrossData").html('<br><a href="#" class="jscrossLink" data-article="' + article + '">Кросскоды из JCCross</a>')
+                    $("#volnaData").html('<br><a href="#" class="volnaLink" data-article="' + article + '">Парсер Volna Parts</a>')
+                    
                 
                     $("#mnkData").html('<br><a href="#" class="mnkLink" data-description="' + description + '" data-article="' + article + '">Данные из MNK</a>')
                     $("#jscrossData").html('<br><a href="#" class="jscrossLink" data-article="' + article + '">Кросскоды из JCCross</a>')
