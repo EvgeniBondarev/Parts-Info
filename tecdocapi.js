@@ -471,7 +471,7 @@
             $("#jscrossInfo").hide().empty();
             
             $.ajax({
-                url: 'http://109.196.101.10:8000/cr-t-cross/maincode/' + article,
+                url: 'http://109.196.101.10:8000/cr-t-cross/bycode/' + article,
                 method: 'GET',
                 dataType: 'json',
                 success: function(response) {
